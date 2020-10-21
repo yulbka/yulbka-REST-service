@@ -1,6 +1,6 @@
 const morgan = require('morgan');
 
-morgan.token('params', (req) => JSON.stringify(req.params));
+morgan.token('query', (req) => JSON.stringify(req.query));
 morgan.token('body', (req) => {
   let body = req.body;
   if (body.password) {
@@ -16,7 +16,7 @@ const logger = morgan(function(tokens, req, res) {
   return [
     `method: ${tokens.method(req)},`,
     `url: ${tokens.url(req)},`,
-    `request params: ${tokens.params(req)},`,
+    `request query params: ${tokens.query(req)},`,
     `request body: ${tokens.body(req)}`
   ].join(' ')
 });
