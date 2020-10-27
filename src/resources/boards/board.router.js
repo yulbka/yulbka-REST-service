@@ -5,7 +5,7 @@ const boardsService = require('./board.service');
 router.route('/').get(async (req, res, next) => {
   try {
     const boards = await boardsService.getAll();
-    res.json(boards);
+    res.json(boards.map(Board.toResponse));
   } catch (error) {
     return next(error);
   }
@@ -18,7 +18,7 @@ router.route('/:id').get(async (req, res, next) => {
     if (!board) {
       res.status(404).send('Board not found');
     } else {
-      res.json(board);
+      res.json(Board.toResponse(board));
     }
   } catch (error) {
     return next(error);
@@ -27,11 +27,12 @@ router.route('/:id').get(async (req, res, next) => {
 
 router.route('/').post(async (req, res, next) => {
   try {
-    if (!Board.validate(req.body)) {
-      return res.status(400).send('Bad request');
-    }
     const board = await boardsService.post(req.body);
-    res.json(board);
+    if (!board) {
+      res.status(404).send('Board not found');
+    } else {
+      res.json(Board.toResponse(board));
+    }
   } catch (error) {
     return next(error);
   }
@@ -40,9 +41,14 @@ router.route('/').post(async (req, res, next) => {
 router.route('/:id').put(async (req, res, next) => {
   try {
     const id = req.params.id;
-    const board = req.body;
-    await boardsService.put(id, board);
-    res.json(board);
+    const newBoard = req.body;
+    newBoard.columns = newBoard.columns.map(({ id, title, order }) => ({ _id: id, title, order }));
+    const board = await boardsService.put(id, newBoard);
+    if (!board) {
+      res.status(404).send('Board not found');
+    } else {
+      res.json(Board.toResponse(board));
+    }
   } catch (error) {
     return next(error);
   }

@@ -1,41 +1,20 @@
-const database = require('../../common/database');
 const User = require('./user.model');
+const Task = require('../tasks/task.model');
 
-const getAll = async () => {
-  return database.users;
-};
+const getAll = async () => User.find({});
 
-const get = async id => {
-  if (!database.users.filter(user => user.id === id).length) {
-    return false;
-  }
-  return database.users.filter(user => user.id === id)[0];
-};
+const get = async id => User.findById(id);
 
-const post = async user => {
-  const newUser = new User(user);
-  database.users.push(newUser);
-  return newUser;
-};
+const post = async user => User.create(user);
 
 const put = async (id, user) => {
-  database.users = [...database.users.filter(user => user.id !== id), user];
-  return user;
-};
+  await User.updateOne({_id: id }, user);
+  return get(id);
+}
 
 const deleteUser = async id => {
-  if (!database.users.filter(user => user.id === id).length) {
-    return false;
-  }
-  database.users = database.users.filter(user => user.id !== id);
-  Object.values(database.tasks);
-  for (const [board, tasks] of Object.entries(database.tasks)) {
-    tasks.map(task => {
-      if (task.userId === id) {
-        task.userId = null;
-      }
-    });
-  }
+  await User.deleteOne({ _id: id });
+  await Task.updateMany({ userId: id }, { userId: null });
   return true;
 };
 

@@ -1,39 +1,21 @@
-const database = require('../../common/database');
 const Board = require('./board.model');
+const Task = require('../tasks/task.model');
 
-const getAll = async () => {
-  return database.boards;
-};
+const getAll = async () => Board.find({});
 
-const get = async id => {
-  if (!database.boards.filter(board => board.id === id).length) {
-    return false;
-  }
-  return database.boards.filter(board => board.id === id)[0];
-};
+const get = async id => Board.findById(id);
 
-const post = async board => {
-  const newBoard = new Board(board);
-  database.boards.push(newBoard);
-  database.tasks[newBoard.id] = [];
-  return newBoard;
-};
+const post = async board => Board.create(board);
 
 const put = async (id, board) => {
-  const updatedBoard = board;
-  database.boards = [
-    ...database.boards.filter(board => board.id !== id),
-    updatedBoard
-  ];
-};
+  await Board.updateOne({ _id: id }, board);
+  return get(id);
+}
 
 const deleteBoard = async id => {
-  if (!database.boards.filter(board => board.id === id).length) {
-    return false;
-  }
-  database.boards = database.boards.filter(board => board.id !== id);
-  database.tasks[id] = [];
+  await Board.deleteOne({_id: id});
+  await Task.deleteMany({ boardId: id });
   return true;
-};
+}
 
 module.exports = { getAll, get, post, put, deleteBoard };
