@@ -1,42 +1,13 @@
-const database = require('../../common/database');
 const Task = require('./task.model');
 
-const getAll = async boardId => {
-  return database.tasks[boardId];
-};
+const getAll = async boardId => Task.find({ boardId });
 
-const get = async (boardId, taskId) => {
-  if (!database.tasks[boardId].filter(task => task.id === taskId).length) {
-    return false;
-  }
-  return database.tasks[boardId].filter(task => task.id === taskId)[0];
-};
+const get = async (boardId, taskId) => Task.find({ boardId, _id: taskId });
 
-const post = async (boardId, task) => {
-  const newTask = {
-    ...new Task(task),
-    boardId
-  };
-  database.tasks[boardId].push(newTask);
-  return newTask;
-};
+const post = async (boardId, task) => Task.create({ ...task, boardId  });
 
-const put = async (boardId, taskId, task) => {
-  const updatedTask = task;
-  database.tasks[boardId] = [
-    ...database.tasks[boardId].filter(task => task.id !== taskId),
-    updatedTask
-  ];
-};
+const put = async (boardId, taskId, task) => Task.updateOne({ boardId, _id: taskId }, task);
 
-const deleteTask = async (boardId, taskId) => {
-  if (!database.tasks[boardId].filter(task => task.id === taskId).length) {
-    return false;
-  }
-  database.tasks[boardId] = database.tasks[boardId].filter(
-    task => task.id !== taskId
-  );
-  return true;
-};
+const deleteTask = async (boardId, taskId) => Task.deleteOne({ boardId, _id: taskId });
 
 module.exports = { getAll, post, get, put, deleteTask };
