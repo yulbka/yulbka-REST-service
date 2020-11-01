@@ -3,9 +3,11 @@ const swaggerUI = require('swagger-ui-express');
 const path = require('path');
 const YAML = require('yamljs');
 const logger = require('./common/logger');
+const loginRouter = require('./resources/login/login.router');
 const userRouter = require('./resources/users/user.router');
 const boardRouter = require('./resources/boards/board.router');
 const taskRouter = require('./resources/tasks/task.router');
+const verifyAuth = require('./common/verifyAuth');
 
 const app = express();
 
@@ -35,9 +37,10 @@ app.use('/', (req, res, next) => {
   next();
 });
 
-app.use('/users', userRouter);
-app.use('/boards', boardRouter);
-app.use('/boards/:boardId/tasks', taskRouter);
+app.use('/login', loginRouter);
+app.use('/users', verifyAuth, userRouter);
+app.use('/boards', verifyAuth, boardRouter);
+app.use('/boards/:boardId/tasks', verifyAuth, taskRouter);
 
 app.use((err, req, res, next) => {
   console.error(`Internal Server Error: ${err.message}`);
