@@ -1,3 +1,4 @@
+const crypt = require('../../common/crypt');
 const User = require('./user.model');
 const Task = require('../tasks/task.model');
 
@@ -5,7 +6,13 @@ const getAll = async () => User.find({});
 
 const get = async id => User.findById(id);
 
-const post = async user => User.create(user);
+const post = async user => {
+  const userData = {
+    ...user,
+    password: await crypt.crypt(user.password),
+  }
+  return User.create(userData);
+}
 
 const put = async (id, user) => {
   await User.updateOne({_id: id }, user);
